@@ -1,0 +1,115 @@
+---
+title: "Statistical Inference Project - Tooth Growth by Ola"
+output: pdf_document
+---
+
+We're going to analyze the ToothGrowth dataset in the R datasets package.  
+
+Dataset name:  'The Effect of Vitamin C on Tooth Growth in Guinea Pigs'. 
+
+Description:  The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+Format: A data frame with 60 observations on 3 variables.
+
+
+Before I proceed with the project, I add the library ggplot2. I load the data.
+```{r}
+library(ggplot2)
+data(ToothGrowth)
+```
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+
+
+Let's try to show all 3 parameters of our data: length (len), dose (dose) and delivery method (supp). We plot dose vs len and colour our data points due to the variable supp.
+
+```{r}
+p1 <- ggplot(aes(x=len, y = dose), data = ToothGrowth) 
+p1 <- p1 + geom_point(aes(color = supp)) 
+p1
+```
+
+This basic plots suggests that there might be a difference in average tooth length for various doses and supp values. Let's see whether this is indeed true: 
+```{r}
+p2 <- ggplot(aes(x = supp, y = len), data = ToothGrowth)
+p2 <- p2 + geom_boxplot(aes(fill = supp)) 
+p2 <- p2 + facet_wrap(~ dose)
+p2
+```
+
+
+2. Provide a basic summary of the data.
+
+The most basic summary of the data is using the summary function in R.
+
+```{r}
+
+summary(ToothGrowth)
+```
+
+
+However, a more appropriate summary would be if we include variablity by dose and supp. 
+
+```{r}
+
+by(ToothGrowth$len, INDICES = list(ToothGrowth$supp, ToothGrowth$dose), summary)
+```
+
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+
+
+a. Below we test by supp factor and do not consider dosage.
+
+Null hypothesis: there is not a significant difference in tooth length between the two supplement types.
+
+```{r}
+testA <- t.test(len ~ supp, paired = F, var.equal = F, data = ToothGrowth)
+testA$p.value
+```
+
+We read the results of the t test as follows: We cannot reject the null hypothesis.
+
+b. Below we test by dosage factor not considering the supplement type. We perform testing between pairs of dosages. 
+
+```{r}
+Dose12 <- subset(ToothGrowth, dose %in% c(0.5, 1.0))
+Dose13 <- subset(ToothGrowth, dose %in% c(0.5, 2.0))
+Dose23 <- subset(ToothGrowth, dose %in% c(1.0, 2.0))
+```
+
+
+Null hypothesis: increasing the dose level does not lead to an increase in tooth length.
+
+```{r}
+testB1 <- t.test(len ~ dose, paired = F, var.equal = F, data = Dose12)
+testB1
+```
+
+```{r}
+testB2 <- t.test(len ~ dose, paired = F, var.equal = F, data = Dose23)
+testB2
+```
+
+```{r}
+testB3 <- t.test(len ~ dose, paired = F, var.equal = F, data = Dose13)
+testB3
+```
+
+For this three pairs of dose levels, the p-value is less than 0.05. This means that we can reject the null hypothesis. 
+
+C. 
+
+4. State your conclusions and the assumptions needed for your conclusions.
+
+
+Conclusions: 
+
+- Supplement type does not influence tooth length.
+- Inreasing the dose level leads to an increase in tooth length.
+
+Assumptions
+
+- The 60 gunue pigs in the study are representative of gunea pigs population. The assignment of guinea pigs to different supplements and doses were random. 
+- The variances for t test are assumed to be different between two compared groups.
+
+
