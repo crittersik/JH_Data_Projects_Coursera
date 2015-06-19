@@ -6,3 +6,6 @@ Statistical_Inference file with the solution for the peer assessment project on 
 
 Added:
 Exploratory_Data_Analysis file with the solution for the peer assessment project 2 on the Exploratory Data Analysis Coursera course.
+
+Added:
+Regression_Models file with the solution for the peer assessment project on the Regression Models Coursera course.
