@@ -1,0 +1,90 @@
+---
+title: "Mtcars dataset analysis"
+author: "Ola"
+date: "Friday, June 19, 2015"
+output: pdf_document
+---
+
+This is an analysis for the Regression Models course by the Johns Hopkins University on Coursera. 
+
+The dataset mtcars was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973-74 models). The data frame has 32 observations on 11 variables. We load the data set below, together with the ggplot2 library.
+
+```{r}
+data(mtcars)
+library(ggplot2)
+```
+
+#Is an automatic or manual transmission better for MPG?
+
+Our dataset is divided into automatic (am=0) or manual (am=1) transmission cars. We perform a t-test to see if a difference between mean MPG values for this subsets of data (am=0 and am=1) is statistically significant.
+
+
+```{r}
+
+test_result <- t.test(mpg ~ am, data = mtcars)
+test_result$estimate
+test_result$p.value
+
+```
+
+The p-value is 0.0014 and we can reject the null hypothesis. We can conclude that the mpg of am=1 (manual) group is significantly larger than am=0 (automatic) group. This is illustrated in Fig. 1 in the Appendix.
+
+
+#Quantify the MPG difference between automatic and manual transmissions"
+
+We fit the model to the available data. The simplest fit is based on am as the only regressor.
+
+```{r}
+fit1 <- lm(mpg ~ am, data=mtcars)
+summary(fit1)$adj.r.squared
+```
+
+This simple model has adjusted R-squared: 0.34. A more complex model would take into account also other parameters. To see how much other parameters available in mtcars data influence mpg values, we use the aov function.
+
+```{r}
+full_param_set <- aov(mpg ~ ., data = mtcars)
+summary(full_param_set)
+```
+
+Variables with low p-value (below 0.05) are most influencial. We choose cyl, disp, wt and am for the fit to a linear model. You can see an illustration of that in Fig. 2 in the appendix.
+
+```{r}
+fit2 <- lm(mpg ~ cyl + disp + wt + am, data=mtcars)
+summary(fit2)$coefficients
+```
+
+We can remove disp from the fit, as it is not significant. (We prefer to leave am, as it is assumed in the given problem).
+
+ 
+```{r}
+fit3 <- lm(mpg ~ cyl + wt + am, data=mtcars)
+summary(fit3)$coefficients
+```
+
+This model seems to be our best - its adjusted r-squared is 0.81 and this is our final model. However, we cannot reject the null hypothesis for the variable am.
+
+Our first impression that the am is very significant in predicting the value of mpg occured to be flase, when other variables has been included. Other variables: cyl and wt are more important to determination of mpg.
+
+#Appendix A - supporting figures
+
+MPG boxplot for am=0 (automatic) and am=1 (manual).
+```{r}
+#Fig. 1
+g = ggplot(mtcars, aes(factor(am), mpg, fill=factor(am)))
+g = g + geom_boxplot()
+g = g + geom_jitter(position=position_jitter(width=.1, height=0))
+g = g + scale_colour_discrete(name = "Type")
+g = g + scale_fill_discrete(name="Type", breaks=c("0", "1"),
+            labels=c("Automatic", "Manual"))
+g = g + scale_x_discrete(breaks=c("0", "1"), labels=c("Automatic", "Manual"))
+g = g + xlab("")
+g
+```
+
+A matrix of scatterplots for mtcars data is produced.
+```{r}
+#Fig. 2
+pairs(mtcars, panel=panel.smooth, main="MTcars pair graphs")
+```
+
+
